@@ -299,7 +299,7 @@ export default class Drawer extends Component {
     this.setState({ open: true }, () => {
       Animated.timing(this._animatedPosition, {
         toValue: this.config.position.end,
-        duration: 400,
+        duration: 200,
       }).start();
     });
   };
@@ -309,7 +309,7 @@ export default class Drawer extends Component {
     this._scrollView.scrollTo({ y: 0 });
     Animated.timing(this._animatedPosition, {
       toValue: this.config.position.start,
-      duration: 400,
+      duration: 500,
     }).start(() => this.setState({
       open: false,
     }));
