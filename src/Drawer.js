@@ -363,11 +363,11 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,   // fill up all screen
     alignItems: 'center',               // center children
     justifyContent: 'flex-start',       // align popup at the bottom
-    backgroundColor: 'black',
+    backgroundColor: 'transparent',
   },
   // Body
   content: {
-    backgroundColor: 'black',
+    backgroundColor: 'transparent',
     height: height,
   },
   // Header
