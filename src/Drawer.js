@@ -71,7 +71,7 @@ export default class Drawer extends Component {
     // Window width
     width: {
       end: width,         // takes full with once opened
-      start: width - 20,  // slightly narrower than screen when closed
+      start: width - (this.props.shrinkMargin || 20),  // slightly narrower than screen when closed
     },
     // Window backdrop opacity
     opacity: {
