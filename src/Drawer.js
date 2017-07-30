@@ -24,6 +24,9 @@ export default class Drawer extends Component {
     children: PropTypes.any,
     // Whether the window is open or not
     isOpen: PropTypes.bool,
+    // Callbacks for open & close events
+    onOpen: PropTypes.func,
+    onClosed: PropTypes.func,
     // Header that shows up on top the screen when opened
     header: PropTypes.string,
     // Header height
@@ -302,6 +305,7 @@ export default class Drawer extends Component {
         duration: 200,
       }).start();
     });
+    if (this.props.onOpen) this.props.onOpen()
   };
 
   // Minimize window and keep a teaser at the bottom
@@ -313,6 +317,7 @@ export default class Drawer extends Component {
     }).start(() => this.setState({
       open: false,
     }));
+    if (this.props.onClose) this.props.onClose()
   };
 
   // Toggle window state between opened and closed
