@@ -210,8 +210,8 @@ export default class Drawer extends Component {
 
   // Either allow or deny gesture handler
   _grantPanResponder = (evt, gestureState) => {
-    // Allow if is not open
-    if (!this.state.open) {
+    // Allow if is not open & dragging
+    if (!this.state.open && (this.pulledDown(gestureState) || this.pulledUp(gestureState))) {
       return true;
     }
     // Allow if user haven't scroll the content yet
