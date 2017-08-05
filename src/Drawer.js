@@ -287,7 +287,7 @@ export default class Drawer extends Component {
   pulledFast = (gestureState) => Math.abs(gestureState.vy) > 0.75;
 
   // Check if pulled far
-  pulledFar = (gestureState) => Math.abs(gestureState.dy) > 50;
+  pulledFar = (gestureState) => Math.abs(gestureState.dy) > 250;
 
   // Check if current position is inside allowed range
   insideAllowedRange = () =>
