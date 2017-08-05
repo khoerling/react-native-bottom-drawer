@@ -290,7 +290,7 @@ export default class Drawer extends Component {
   pulledFast = (gestureState) => Math.abs(gestureState.vy) > 0.75;
 
   // Check if pulled far
-  pulledFar = (gestureState) => Math.abs(gestureState.dy) > 250;
+  pulledFar = (gestureState) => Math.abs(gestureState.dy) > 150;
 
   // Check if current position is inside allowed range
   insideAllowedRange = () =>
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,   // fill up all screen
     alignItems: 'center',               // center children
     justifyContent: 'flex-start',       // align popup at the bottom
-    backgroundColor: 'transparent',
+    backgroundColor: 'rgba(0,0,0,.6)',
   },
   // Body
   content: {
