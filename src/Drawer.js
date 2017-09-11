@@ -20,6 +20,8 @@ export default class Drawer extends Component {
 
   // Define prop types
   static propTypes = {
+    // Should the drawer be openable or not?
+    isLocked: PropTypes.bool,
     // Pass messages to show as children
     children: PropTypes.any,
     // Whether the window is open or not
@@ -37,6 +39,7 @@ export default class Drawer extends Component {
 
   // Set default prop values
   static defaultProps = {
+    isLocked: false,
     isOpen: false,
     header: 'Messages',
     headerHeight: 70,
@@ -258,7 +261,7 @@ export default class Drawer extends Component {
       return this.close();
     }
     // Pulled up and far enough to trigger open
-    else if (this.pulledUp(gestureState) && this.pulledFar(gestureState)) {
+    else if (!this.props.isLocked && this.pulledUp(gestureState) && this.pulledFar(gestureState)) {
       return this.open();
     }
     // Toggle if tapped
