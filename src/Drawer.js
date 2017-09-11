@@ -67,7 +67,7 @@ export default class Drawer extends Component {
       // end value - headerHeight lower than the top of the screen
       end: this.props.headerHeight,
       // minimal possible value - a bit lower the top of the screen
-      min: this.props.headerHeight,
+      min: this.props.headerHeight + (this.props.isLocked ? 250 : 25),
       // When animated triggers these value updates
       animates: [
         () => this._animatedOpacity,
