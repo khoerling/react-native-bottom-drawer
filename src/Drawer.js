@@ -33,6 +33,8 @@ export default class Drawer extends Component {
     header: PropTypes.string,
     // Header height
     headerHeight: PropTypes.number,
+    // Header icon
+    headerIcon: PropTypes.string,
     // Height of the visible teaser area at the bottom of the screen
     teaserHeight: PropTypes.number,
     // Offset from top, in addition to headerHeight, that drawer should open
@@ -47,6 +49,7 @@ export default class Drawer extends Component {
     headerHeight: 70,
     teaserHeight: 75,
     openMax: 0,
+    headerIcon: 'md-arrow-up',
   };
 
   // Define state
@@ -175,7 +178,7 @@ export default class Drawer extends Component {
             <View style={[styles.header, this.getHeaderStyle()]}>
               {/* Icon */}
               <View style={styles.headerIcon}>
-                <Icon name="md-arrow-up" size={24} color="white" />
+                <Icon name={this.props.headerIcon} size={24} color="white" />
               </View>
               {/* Header */}
               <View style={styles.headerTitle}>
