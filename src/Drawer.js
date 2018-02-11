@@ -177,7 +177,7 @@ export default class Drawer extends Component {
           <TouchableWithoutFeedback onPress={this.close}>
             <View style={[styles.header, this.getHeaderStyle()]}>
               {/* Icon */}
-              <View style={[styles.headerIcon, {marginTop: -(this.props.headerHeight - 30)}]}>
+              <View style={styles.headerIcon}>
                 <Icon name={this.props.headerIcon} size={24} color="white" />
               </View>
               {/* Header */}
