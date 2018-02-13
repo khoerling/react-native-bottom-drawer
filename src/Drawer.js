@@ -60,6 +60,8 @@ export default class Drawer extends Component {
     pulling: false,
     // Zero means user haven't scrolled the content yet
     scrollOffset: 0,
+    // Offset from top, in addition to headerHeight, that drawer should open
+    openMax: 0,
   };
 
   // Configure animations
@@ -71,9 +73,9 @@ export default class Drawer extends Component {
       // starting value - teaserHeight higher than the bottom of the screen
       start: height - this.props.teaserHeight,
       // end value - headerHeight lower than the top of the screen
-      end: this.props.headerHeight + this.props.openMax,
+      end: this.props.headerHeight + this.state.openMax,
       // minimal possible value - a bit lower the top of the screen
-      min: this.props.headerHeight + (this.props.isLocked ? 250 : this.props.openMax),
+      min: this.props.headerHeight + (this.props.isLocked ? 250 : this.state.openMax),
       // When animated triggers these value updates
       animates: [
         () => this._animatedOpacity,
@@ -137,6 +139,12 @@ export default class Drawer extends Component {
 
   // Handle isOpen prop changes to either open or close the window
   componentWillReceiveProps(nextProps) {
+    // update openMax
+    if (nextProps.openMax) {
+      this.setState({openMax: nextProps.openMax})
+      this.config.position.end = this.props.headerHeight + nextProps.openMax
+    }
+
     // isOpen prop changed to true from false
     if (!this.props.isOpen && nextProps.isOpen) {
       this.open();
