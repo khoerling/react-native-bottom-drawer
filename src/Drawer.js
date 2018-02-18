@@ -48,7 +48,7 @@ export default class Drawer extends Component {
     header: 'Messages',
     headerHeight: 70,
     teaserHeight: 75,
-    openMax: 0,
+    openMax: 200,
     headerIcon: 'md-arrow-up',
   };
 
