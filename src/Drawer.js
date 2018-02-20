@@ -327,15 +327,16 @@ export default class Drawer extends Component {
 
   // Minimize window and keep a teaser at the bottom
   close = () => {
-    Animated.timing(this._animatedPosition, {
-      toValue: this.config.position.start,
-      duration: 500,
-    }).start(() => this.setState({
-      open: false,
-    }));
-    if (this.props.onClose) this.props.onClose()
-    setTimeout(_ => this._scrollView.scrollTo({ y: 0 }), 501)
-  };
+    setTimeout(_ => {
+      Animated.timing(this._animatedPosition, {
+        toValue: this.config.position.start,
+        duration: 500,
+      }).start(() => this.setState({
+        open: false,
+      }));
+      if (this.props.onClose) this.props.onClose()
+      setTimeout(_ => this._scrollView.scrollTo({ y: 0 }), 100)
+    }, 10)}
 
   // Toggle window state between opened and closed
   toggle = () => {
