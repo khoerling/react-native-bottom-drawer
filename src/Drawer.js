@@ -320,8 +320,8 @@ export default class Drawer extends Component {
     this.setState({ open: true }, () => {
       Animated.timing(this._animatedPosition, {
         toValue: this.config.position.end,
-        duration: 200,
         useNativeDriver: true,
+        duration: 120,
       }).start();
     });
     if (this.props.onOpen) this.props.onOpen()
@@ -338,7 +338,7 @@ export default class Drawer extends Component {
         open: false,
       }));
       if (this.props.onClose) this.props.onClose()
-      setTimeout(_ => this._scrollView.scrollTo({ y: 0 }), 100)
+      setTimeout(_ => this._scrollView.scrollTo({ y: 0 }), 125)
     }, 10)}
 
   // Toggle window state between opened and closed
