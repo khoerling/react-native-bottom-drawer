@@ -201,7 +201,8 @@ export default class Drawer extends Component {
             // Add padding at the bottom to fit all content on the screen
             paddingBottom: this.props.headerHeight,
             // Animate width
-            width: animatedWidth,
+            // width: animatedWidth,
+            width: this.config.width.start + 20,
             // Animate position on the screen
             transform: [{ translateY: this._animatedPosition }, { translateX: 0 }]
           }]}
@@ -320,6 +321,7 @@ export default class Drawer extends Component {
       Animated.timing(this._animatedPosition, {
         toValue: this.config.position.end,
         duration: 200,
+        useNativeDriver: true,
       }).start();
     });
     if (this.props.onOpen) this.props.onOpen()
@@ -330,6 +332,7 @@ export default class Drawer extends Component {
     setTimeout(_ => {
       Animated.timing(this._animatedPosition, {
         toValue: this.config.position.start,
+        useNativeDriver: true,
         duration: 500,
       }).start(() => this.setState({
         open: false,
