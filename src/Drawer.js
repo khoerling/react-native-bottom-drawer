@@ -62,6 +62,7 @@ export default class Drawer extends Component {
     scrollOffset: 0,
     // Offset from top, in addition to headerHeight, that drawer should open
     openMax: 0,
+    isLocked: false,
   };
 
   // Configure animations
@@ -75,7 +76,7 @@ export default class Drawer extends Component {
       // end value - headerHeight lower than the top of the screen
       end: this.props.headerHeight + this.state.openMax,
       // minimal possible value - a bit lower the top of the screen
-      min: this.props.headerHeight + (this.props.isLocked ? 250 : this.state.openMax),
+      min: this.props.headerHeight + (this.state.isLocked ? 250 : this.state.openMax),
       // When animated triggers these value updates
       animates: [
         () => this._animatedOpacity,
@@ -144,6 +145,9 @@ export default class Drawer extends Component {
       this.setState({openMax: nextProps.openMax})
       this.config.position.end = this.props.headerHeight + nextProps.openMax
     }
+
+    // isLocked prop changed
+    if (nextProps.isLocked) this.setState({isLocked: nextProps.isLocked})
 
     // isOpen prop changed to true from false
     if (!this.props.isOpen && nextProps.isOpen) {
@@ -276,7 +280,7 @@ export default class Drawer extends Component {
       return this.close();
     }
     // Pulled up and far enough to trigger open
-    else if (!this.props.isLocked && this.pulledUp(gestureState) && this.pulledFar(gestureState)) {
+    else if (!this.state.isLocked && this.pulledUp(gestureState) && this.pulledFar(gestureState)) {
       return this.open();
     }
     // Toggle if tapped
