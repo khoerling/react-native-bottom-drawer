@@ -328,8 +328,8 @@ export default class Drawer extends Component {
         open: false,
       }));
       if (this.props.onClose) this.props.onClose()
-      setTimeout(_ => this._scrollView.scrollTo({ y: 0 }), 125)
-    }, 10)}
+      setTimeout(_ => this._scrollView.scrollTo({ y: 0 }), 150)
+    }, 25)}
 
   // Toggle window state between opened and closed
   toggle = () => {
