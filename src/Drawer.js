@@ -37,8 +37,6 @@ export default class Drawer extends Component {
     headerIcon: PropTypes.string,
     // Height of the visible teaser area at the bottom of the screen
     teaserHeight: PropTypes.number,
-    // Offset from top, in addition to headerHeight, that drawer should open
-    openMax: PropTypes.number,
   };
 
   // Set default prop values
@@ -48,7 +46,6 @@ export default class Drawer extends Component {
     header: 'Messages',
     headerHeight: 70,
     teaserHeight: 75,
-    openMax: 0,
     headerIcon: 'md-arrow-up',
   };
 
@@ -72,9 +69,9 @@ export default class Drawer extends Component {
       // starting value - teaserHeight higher than the bottom of the screen
       start: height - this.props.teaserHeight,
       // end value - headerHeight lower than the top of the screen
-      end: this.props.headerHeight + this.props.openMax,
+      end: this.props.headerHeight,
       // minimal possible value - a bit lower the top of the screen
-      min: this.props.headerHeight + (this.props.isLocked ? 250 : this.props.openMax),
+      min: this.props.headerHeight + (this.props.isLocked ? 250 : 25),
       // When animated triggers these value updates
       animates: [
         () => this._animatedOpacity,
