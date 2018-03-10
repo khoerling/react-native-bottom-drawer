@@ -71,7 +71,7 @@ export default class Drawer extends Component {
       // end value - headerHeight lower than the top of the screen
       end: this.props.headerHeight,
       // minimal possible value - a bit lower the top of the screen
-      min: this.props.headerHeight + (this.props.isLocked ? 250 : 25),
+      min: this.props.headerHeight + (this.state.isLocked ? 250 : 25),
       // When animated triggers these value updates
       animates: [
         () => this._animatedOpacity,
@@ -303,12 +303,15 @@ export default class Drawer extends Component {
   pulledFar = (gestureState) => Math.abs(gestureState.dy) > 150;
 
   // Check if current position is inside allowed range
-  insideAllowedRange = () =>
-    this._currentPosition >= this.config.position.min
-    && this._currentPosition <= this.config.position.max;
+  insideAllowedRange = () => {
+    if (this.state.isLocked && this._currentPosition <= 400) return false
+    return this._currentPosition >= this.config.position.min
+      && this._currentPosition <= this.config.position.max;
+  }
 
   // Open up the window on full screen
   open = () => {
+    if (this.state.isLocked) return // guard
     this.setState({ open: true }, () => {
       Animated.timing(this._animatedPosition, {
         toValue: this.config.position.end,
