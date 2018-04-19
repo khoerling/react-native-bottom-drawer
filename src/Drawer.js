@@ -304,7 +304,7 @@ export default class Drawer extends Component {
 
   // Check if current position is inside allowed range
   insideAllowedRange = () => {
-    if (this.state.isLocked && this._currentPosition <= 400) return false
+    if (this.state.isLocked && this._currentPosition <= this.config.position.min + (isIphoneX ? 475 : 325)) return false
     return this._currentPosition >= this.config.position.min
       && this._currentPosition <= this.config.position.max;
   }
@@ -331,7 +331,7 @@ export default class Drawer extends Component {
         open: false,
       }));
       if (this.props.onClose) this.props.onClose()
-      setTimeout(_ => this._scrollView.scrollTo({ y: 0 }), 200)
+      setTimeout(_ => this._scrollView.scrollTo({ y: 0 }), 250)
     }, 50)}
 
   // Toggle window state between opened and closed
