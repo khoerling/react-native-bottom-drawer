@@ -304,7 +304,7 @@ export default class Drawer extends Component {
 
   // Check if current position is inside allowed range
   insideAllowedRange = () => {
-    if (this.state.isLocked && this._currentPosition <= this.config.position.min + (isIphoneX ? 475 : 325)) return false
+    if (this.state.isLocked && this._currentPosition <= this.config.position.min + (isIphoneX ? 475 : 340)) return false
     return this._currentPosition >= this.config.position.min
       && this._currentPosition <= this.config.position.max;
   }
