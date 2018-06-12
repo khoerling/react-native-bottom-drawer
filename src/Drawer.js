@@ -30,6 +30,8 @@ export default class Drawer extends Component {
     // Callbacks for open & close events
     onOpen: PropTypes.func,
     onClosed: PropTypes.func,
+    onStartDrag: PropTypes.func,
+    onStopDrag: PropTypes.func,
     // Header that shows up on top the screen when opened
     header: PropTypes.string,
     // Header height
@@ -244,6 +246,7 @@ export default class Drawer extends Component {
   _handlePanResponderGrant = (evt, gestureState) => {
     // Update the state so we know we're in the middle of pulling it
     this.setState({ pulling: true });
+    if (this.props.onStartDrag) this.props.onStartDrag()
     // Set offset and initialize with 0 so we update it
     // with relative values from gesture handler
     this._animatedPosition.setOffset(this._currentPosition);
@@ -264,6 +267,7 @@ export default class Drawer extends Component {
     this._animatedPosition.flattenOffset();
     // Reset pulling state
     this.setState({ pulling: false });
+    if (this.props.onStopDrag) this.props.onStopDrag()
     // Pulled down and far enough to trigger close
     if (this.pulledDown(gestureState) && this.pulledFar(gestureState)) {
       return this.close();
