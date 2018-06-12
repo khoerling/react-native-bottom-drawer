@@ -6,6 +6,7 @@ import {
   PanResponder,
   Platform,
   ScrollView,
+  FlatList,
   StyleSheet,
   StatusBar,
   Text,
@@ -205,20 +206,20 @@ export default class Drawer extends Component {
           {...this._panResponder.panHandlers}
         >
           {/* Put all content in a scrollable container */}
-          <ScrollView
+          <FlatList
+            data={this.props.data}
+            renderItem={this.props.renderItem}
             ref={(scrollView) => { this._scrollView = scrollView; }}
             // Enable scrolling only when the window is open
             scrollEnabled={this.state.open}
-            // Hide all scrolling indicators
+            // Show/hide scrolling indicators
             showsHorizontalScrollIndicator={false}
-            showsVerticalScrollIndicator={false}
+            showsVerticalScrollIndicator={true}
+            keyExtractor={(item, index) => index.toString()}
             // Trigger onScroll often
             scrollEventThrottle={16}
             onScroll={this._handleScroll}
-          >
-            {/* Render children components */}
-            {children}
-          </ScrollView>
+          />
         </Animated.View>
       </Animated.View>
     );
