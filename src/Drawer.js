@@ -1,21 +1,22 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import {
   Animated,
   Dimensions,
   PanResponder,
   Platform,
   ScrollView,
+  FlatList,
   StyleSheet,
   StatusBar,
   Text,
   TouchableWithoutFeedback,
   View
-} from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+} from 'react-native'
+import Icon from 'react-native-vector-icons/Ionicons'
 
 // Get screen dimensions
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window')
 
 export default class Drawer extends Component {
 
@@ -30,6 +31,9 @@ export default class Drawer extends Component {
     // Callbacks for open & close events
     onOpen: PropTypes.func,
     onClosed: PropTypes.func,
+    onStartDrag: PropTypes.func,
+    onStopDrag: PropTypes.func,
+    onPress: PropTypes.func,
     // Header that shows up on top the screen when opened
     header: PropTypes.string,
     // Header height
@@ -38,7 +42,7 @@ export default class Drawer extends Component {
     headerIcon: PropTypes.string,
     // Height of the visible teaser area at the bottom of the screen
     teaserHeight: PropTypes.number,
-  };
+  }
 
   // Set default prop values
   static defaultProps = {
@@ -48,7 +52,7 @@ export default class Drawer extends Component {
     headerHeight: 70,
     teaserHeight: 75,
     headerIcon: 'md-arrow-up',
-  };
+  }
 
   // Define state
   state = {
@@ -59,7 +63,7 @@ export default class Drawer extends Component {
     // Zero means user haven't scrolled the content yet
     scrollOffset: 0,
     isLocked: false,
-  };
+  }
 
   // Configure animations
   config = {
@@ -89,36 +93,38 @@ export default class Drawer extends Component {
       start: 0,   // fully transparent when closed
       end: 1      // not transparent once opened
     },
-  };
+  }
 
   // Pan responder to handle gestures
-  _panResponder = {};
+  _panResponder = {}
 
   // Animates backdrop opacity
-  _animatedOpacity = new Animated.Value(this.config.opacity.start);
+  _animatedOpacity = new Animated.Value(this.config.opacity.start)
 
   // Animates window width
-  _animatedWidth = new Animated.Value(this.config.width.start);
+  _animatedWidth = new Animated.Value(this.config.width.start)
 
   // Animates window position
   _animatedPosition = new Animated.Value(this.props.isOpen
     ? this.config.position.end
-    : this.config.position.start);
+    : this.config.position.start)
 
   componentWillMount() {
+    global.scrollDrawerBottom = _ => this.scrollDrawerBottom()
+    global.scrollDrawerTop = _ => this.scrollDrawerTop()
     // Set current position
-    this._currentPosition = this._animatedPosition._value;
+    this._currentPosition = this._animatedPosition._value
     // Listen for this._animatedPosition changes
     this._animatedPosition.addListener((value) => {
       // Update _currentPosition
-      this._currentPosition = value.value;
+      this._currentPosition = value.value
       // Animate depending values
       this.config.position.animates.map(item => {
-        item().setValue(value.value);
+        item().setValue(value.value)
       })
-    });
+    })
     // Reset value once listener is registered to update depending animations
-    this._animatedPosition.setValue(this._animatedPosition._value);
+    this._animatedPosition.setValue(this._animatedPosition._value)
     // Initialize PanResponder to handle gestures
     this._panResponder = PanResponder.create({
       onStartShouldSetPanResponder: this._grantPanResponder,
@@ -131,7 +137,7 @@ export default class Drawer extends Component {
       onPanResponderRelease: this._handlePanResponderEnd,
       onPanResponderTerminate: this._handlePanResponderEnd,
       onShouldBlockNativeResponder: (evt, gestureState) => true,
-    });
+    })
   }
 
   // Handle isOpen prop changes to either open or close the window
@@ -141,12 +147,19 @@ export default class Drawer extends Component {
 
     // isOpen prop changed to true from false
     if (!this.props.isOpen && nextProps.isOpen) {
-      this.open();
+      this.open()
     }
     // isOpen prop changed to false from true
     else if (this.props.isOpen && !nextProps.isOpen) {
-      this.close();
+      this.close()
     }
+  }
+  scrollDrawerTop() {
+    this._scrollView.scrollToOffset({ offset: 0, animated: true })
+  }
+  scrollDrawerBottom() {
+    setTimeout(_ => this._scrollView.scrollToEnd({animated: true}), 100)
+    // this._scrollView.scrollToOffset({ offset: 0, animated: true })
   }
 
   render() {
@@ -168,7 +181,7 @@ export default class Drawer extends Component {
           this.config.width.start,            // start: min width at the bottom
           this.config.width.start             // keep min width before previous point
         ],
-      });
+      })
     return (
       <Animated.View style={[styles.container, this.getContainerStyle()]}>
         {/* Use light status bar because we have dark background */}
@@ -203,111 +216,128 @@ export default class Drawer extends Component {
           {...this._panResponder.panHandlers}
         >
           {/* Put all content in a scrollable container */}
-          <ScrollView
-            ref={(scrollView) => { this._scrollView = scrollView; }}
+          <FlatList
+            style={{flex: 1}}
+            data={this.props.data}
+            renderItem={this.props.renderItem}
+            ref={(scrollView) => { this._scrollView = scrollView }}
+            getItemLayout = {(data, index) => {
+              const itemHeight = this.props.itemHeight
+              return {
+                length: itemHeight,
+                offset: itemHeight * index,
+                index,
+              }
+            }}
             // Enable scrolling only when the window is open
             scrollEnabled={this.state.open}
             // Hide all scrolling indicators
             showsHorizontalScrollIndicator={false}
-            showsVerticalScrollIndicator={false}
+            showsVerticalScrollIndicator={true}
             // Trigger onScroll often
+            keyExtractor={(item, index) => index.toString()}
             scrollEventThrottle={16}
+            onResponderRelease={e => {
+              if (e.nativeEvent.locationY <= 5) {
+                this.props.onPress()
+                setTimeout(_ => this.scrollDrawerBottom(), 500)
+              }
+            }}
             onScroll={this._handleScroll}
-          >
-            {/* Render children components */}
-            {children}
-          </ScrollView>
+          />
         </Animated.View>
       </Animated.View>
-    );
+    )
   }
 
   // Either allow or deny gesture handler
   _grantPanResponder = (evt, gestureState) => {
     // Allow if is not open & dragging
     if (!this.state.open && (this.pulledDown(gestureState) || this.pulledUp(gestureState))) {
-      return true;
+      return true
     }
     // Allow if user haven't scroll the content yet
     else if (this.pulledDown(gestureState) && this.state.scrollOffset <= 0) {
-      return true;
+      return true
     }
     // Allow if pulled down rapidly
     else if (this.pulledDown(gestureState) && this.pulledFast(gestureState)) {
-      return true;
+      return true
     }
     // Deny otherwise
-    return false;
-  };
+    return false
+  }
 
   // Called when granted
   _handlePanResponderGrant = (evt, gestureState) => {
     // Update the state so we know we're in the middle of pulling it
-    this.setState({ pulling: true });
+    this.setState({ pulling: true })
+    if (this.props.onStartDrag) this.props.onStartDrag()
     // Set offset and initialize with 0 so we update it
     // with relative values from gesture handler
-    this._animatedPosition.setOffset(this._currentPosition);
-    this._animatedPosition.setValue(0);
-  };
+    this._animatedPosition.setOffset(this._currentPosition)
+    this._animatedPosition.setValue(0)
+  }
 
   // Called when being pulled
   _handlePanResponderMove = (evt, gestureState) => {
     // Update position unless we go outside of allowed range
     if (this.insideAllowedRange()) {
-      this._animatedPosition.setValue(gestureState.dy);
+      this._animatedPosition.setValue(gestureState.dy)
     }
-  };
+  }
 
   // Called when gesture ended
   _handlePanResponderEnd = (evt, gestureState) => {
     // Reset offset
-    this._animatedPosition.flattenOffset();
+    this._animatedPosition.flattenOffset()
     // Reset pulling state
-    this.setState({ pulling: false });
+    this.setState({ pulling: false })
+    if (this.props.onStopDrag) this.props.onStopDrag()
     // Pulled down and far enough to trigger close
     if (this.pulledDown(gestureState) && this.pulledFar(gestureState)) {
-      return this.close();
+      return this.close()
     }
     // Pulled up and far enough to trigger open
     else if (!this.state.isLocked && this.pulledUp(gestureState) && this.pulledFar(gestureState)) {
-      return this.open();
+      return this.open()
     }
     // Toggle if tapped
     else if (this.tapped(gestureState)) {
-      return this.toggle();
+      return this.toggle()
     }
     // Restore back to appropriate position otherwise
     else {
-      this.restore();
+      this.restore()
     }
-  };
+  }
 
   // Handle content scrolling
   _handleScroll = event => {
-    const { y } = event.nativeEvent.contentOffset;
-    this.setState({ scrollOffset: y });
-  };
+    const { y } = event.nativeEvent.contentOffset
+    this.setState({ scrollOffset: y })
+  }
 
   // Check if gesture was a tap
-  tapped = (gestureState) => gestureState.dx === 0 && gestureState.dy === 0;
+  tapped = (gestureState) => gestureState.dx === 0 && gestureState.dy === 0
 
   // Check if pulled up
-  pulledUp = (gestureState) => gestureState.dy < 0;
+  pulledUp = (gestureState) => gestureState.dy < 0
 
   // Check if pulled down
-  pulledDown = (gestureState) => gestureState.dy > 0;
+  pulledDown = (gestureState) => gestureState.dy > 0
 
   // Check if pulled rapidly
-  pulledFast = (gestureState) => Math.abs(gestureState.vy) > 0.75;
+  pulledFast = (gestureState) => Math.abs(gestureState.vy) > 0.75
 
   // Check if pulled far
-  pulledFar = (gestureState) => Math.abs(gestureState.dy) > 150;
+  pulledFar = (gestureState) => Math.abs(gestureState.dy) > 150
 
   // Check if current position is inside allowed range
   insideAllowedRange = () => {
     if (this.state.isLocked && this._currentPosition <= this.config.position.min + (isIphoneX ? 475 : 340)) return false
     return this._currentPosition >= this.config.position.min
-      && this._currentPosition <= this.config.position.max;
+      && this._currentPosition <= this.config.position.max
   }
 
   // Open up the window on full screen
@@ -317,57 +347,55 @@ export default class Drawer extends Component {
       Animated.timing(this._animatedPosition, {
         toValue: this.config.position.end,
         duration: 225,
-      }).start();
-    });
+      }).start()
+    })
     if (this.props.onOpen) this.props.onOpen()
-  };
+  }
 
   // Minimize window and keep a teaser at the bottom
   close = () => {
-    setTimeout(_ => {
       Animated.timing(this._animatedPosition, {
         toValue: this.config.position.start,
         duration: 500,
       }).start(() => this.setState({
         open: false,
-      }));
-      if (this.props.onClose) this.props.onClose()
-      setTimeout(_ => this._scrollView.scrollTo({ y: 0 }), 250)
-    }, 50)}
+      }))
+      if (this.props.onClose) this.props.onClose(this._scrollView)
+    }
 
   // Toggle window state between opened and closed
   toggle = () => {
     if (!this.state.open) {
-      this.open();
+      this.open()
     }
     else {
-      this.close();
+      this.close()
     }
-  };
+  }
 
   // Either open or close depending on the state
   restore = () => {
     if (this.state.open) {
-      this.open();
+      this.open()
     }
     else {
-      this.close();
+      this.close()
     }
-  };
+  }
 
   // Get header style
   getHeaderStyle = () => ({
     height: Platform.OS === 'ios'
       ? this.props.headerHeight
       : this.props.headerHeight - 40, // compensate for the status bar
-  });
+  })
 
   // Get container style
   getContainerStyle = () => ({
     // Move the view below others if not open or moving
     // to not block gesture handlers on other views
     zIndex: this.state.pulling || this.state.open ? 1 : -1,
-  });
+  })
 }
 
 const styles = StyleSheet.create({
@@ -383,7 +411,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,   // fill up all screen
     alignItems: 'center',               // center children
     justifyContent: 'flex-start',       // align popup at the bottom
-    backgroundColor: 'rgba(0,0,0,.6)',
+    backgroundColor: 'rgba(0,0,0,.75)',
   },
   // Body
   content: {
@@ -409,4 +437,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
-});
+})
