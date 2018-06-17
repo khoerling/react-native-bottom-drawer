@@ -356,7 +356,7 @@ export default class Drawer extends Component {
   close = () => {
       Animated.timing(this._animatedPosition, {
         toValue: this.config.position.start,
-        duration: 500,
+        duration: 300,
       }).start(() => this.setState({
         open: false,
       }))
