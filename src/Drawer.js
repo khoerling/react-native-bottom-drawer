@@ -231,7 +231,7 @@ export default class Drawer extends Component {
             }}
             // Enable scrolling only when the window is open
             scrollEnabled={this.state.open}
-            // Hide all scrolling indicators
+            // Show/hide scrolling indicators
             showsHorizontalScrollIndicator={false}
             showsVerticalScrollIndicator={true}
             // Trigger onScroll often
