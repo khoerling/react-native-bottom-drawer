@@ -110,8 +110,8 @@ export default class Drawer extends Component {
     : this.config.position.start)
 
   componentWillMount() {
-    global.scrollDrawerBottom = _ => this.scrollDrawerBottom()
-    global.scrollDrawerTop = _ => this.scrollDrawerTop()
+    global.scrollDrawerBottom = params => this.scrollDrawerBottom(params)
+    global.scrollDrawerTop = params => this.scrollDrawerTop(params)
     // Set current position
     this._currentPosition = this._animatedPosition._value
     // Listen for this._animatedPosition changes
@@ -154,12 +154,11 @@ export default class Drawer extends Component {
       this.close()
     }
   }
-  scrollDrawerTop() {
-    this._scrollView.scrollToOffset({ offset: 0, animated: true })
+  scrollDrawerTop(params) {
+    this._scrollView.scrollToOffset({ offset: 0, animated: false, ...params })
   }
-  scrollDrawerBottom() {
-    setTimeout(_ => this._scrollView.scrollToEnd({animated: true}), 100)
-    // this._scrollView.scrollToOffset({ offset: 0, animated: true })
+  scrollDrawerBottom(params) {
+    this._scrollView.scrollToEnd({ animated: false, ...params })
   }
 
   render() {
