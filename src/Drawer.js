@@ -220,14 +220,6 @@ export default class Drawer extends Component {
             data={this.props.data}
             renderItem={this.props.renderItem}
             ref={(scrollView) => { this._scrollView = scrollView }}
-            getItemLayout = {(data, index) => {
-              const itemHeight = this.props.itemHeight
-              return {
-                length: itemHeight,
-                offset: itemHeight * index,
-                index,
-              }
-            }}
             // Enable scrolling only when the window is open
             scrollEnabled={this.state.open}
             // Show/hide scrolling indicators
