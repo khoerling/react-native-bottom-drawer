@@ -350,7 +350,7 @@ export default class Drawer extends Component {
         duration: 300,
       }).start(() => this.setState({
         open: false,
-      }))
+      }, this.scrollDrawerTop))
       if (this.props.onClose) this.props.onClose(this._scrollView)
     }
 
