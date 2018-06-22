@@ -111,7 +111,6 @@ export default class Drawer extends Component {
 
   componentWillMount() {
     global.scrollDrawerBottom = params => this.scrollDrawerBottom(params)
-    global.scrollDrawerTop = params => this.scrollDrawerTop(params)
     // Set current position
     this._currentPosition = this._animatedPosition._value
     // Listen for this._animatedPosition changes
@@ -154,11 +153,8 @@ export default class Drawer extends Component {
       this.close()
     }
   }
-  scrollDrawerTop(params) {
-    this._scrollView.scrollToOffset({ offset: 0, animated: false, ...params })
-  }
   scrollDrawerBottom(params) {
-    this._scrollView.scrollToEnd({ animated: false, ...params })
+    this._scrollView.scrollToOffset({y: 0, animated: false, ...params})
   }
 
   render() {
@@ -216,6 +212,7 @@ export default class Drawer extends Component {
         >
           {/* Put all content in a scrollable container */}
           <FlatList
+            inverted={this.props.inverted}
             style={{flex: 1}}
             data={this.props.data}
             renderItem={this.props.renderItem}
