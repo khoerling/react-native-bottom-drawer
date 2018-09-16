@@ -443,11 +443,8 @@ const styles = StyleSheet.create({
     top: -NAVBAR_HEIGHT,
     left: 0,
     right: 0,
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,.3)',
+    backgroundColor: 'rgba(225,225,225,.96)',
     height: NAVBAR_HEIGHT,
-    justifyContent: 'center',
-    paddingTop: NAVBAR_HEIGHT,
   },
   // Semi-transparent background below popup
   backdrop: {
@@ -460,7 +457,6 @@ const styles = StyleSheet.create({
   content: {
     backgroundColor: 'transparent',
     height: height,
-    paddingTop: 20,
   },
   // Header
   header: {
