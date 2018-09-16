@@ -14,6 +14,7 @@ import {
   View
 } from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
+import CollapsibleNavBar from '../../../src/CollapsibleNavBar'
 
 // Get screen dimensions
 const { width, height } = Dimensions.get('window')
@@ -157,7 +158,8 @@ export default class Drawer extends Component {
     }
   }
   scrollDrawerBottom(params) {
-    this._scrollView.scrollToOffset({y: 0, animated: false, ...params})
+    if (this._scrollView)
+      this._scrollView.scrollToOffset({y: 0, animated: false, ...params})
   }
 
   closeHeader({animated=false}, cb) {
@@ -203,10 +205,21 @@ export default class Drawer extends Component {
         inputRange: [0, NAVBAR_HEIGHT / 2, NAVBAR_HEIGHT],
         outputRange: [0, 0.8, 1],
       })
+      // Interpolate position value into width value
+      // animatedWidth = this._animatedWidth.interpolate({
+      //   inputRange: [this.config.position.min,// top of the screen
+      //     this.config.position.start - 50,    // 50 pixels higher than next point
+      //     this.config.position.start,         // a bit higher than the bottom of the screen
+      //     this.config.position.max            // the bottom of the screen
+      //   ],
+      //   outputRange: [this.config.width.end,  // keep max width after next point
+      //     this.config.width.end,              // end: max width at 50 pixel higher
+      //     this.config.width.start,            // start: min width at the bottom
+      //     this.config.width.start             // keep min width before previous point
+      //   ],
+      // })
     return (
       <Animated.View style={[styles.container, this.getContainerStyle()]}>
-        {/* Use light status bar because we have dark background */}
-        <StatusBar barStyle={"light-content"} />
         {/* Backdrop with animated opacity */}
         <Animated.View style={[styles.backdrop, { opacity: animatedOpacity }]}>
           {/* Close window when tapped on header */}
@@ -447,6 +460,7 @@ const styles = StyleSheet.create({
   content: {
     backgroundColor: 'transparent',
     height: height,
+    paddingTop: 20,
   },
   // Header
   header: {
