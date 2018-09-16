@@ -17,6 +17,8 @@ import Icon from 'react-native-vector-icons/Ionicons'
 
 // Get screen dimensions
 const { width, height } = Dimensions.get('window')
+const AnimatedListView = Animated.createAnimatedComponent(FlatList)
+const NAVBAR_HEIGHT = 64
 
 export default class Drawer extends Component {
 
@@ -42,6 +44,7 @@ export default class Drawer extends Component {
     headerIcon: PropTypes.string,
     // Height of the visible teaser area at the bottom of the screen
     teaserHeight: PropTypes.number,
+    HeaderComponent: PropTypes.any,
   }
 
   // Set default prop values
@@ -63,6 +66,7 @@ export default class Drawer extends Component {
     // Zero means user haven't scrolled the content yet
     scrollOffset: 0,
     isLocked: false,
+    scrollY: 0,
   }
 
   // Configure animations
@@ -80,7 +84,6 @@ export default class Drawer extends Component {
       // When animated triggers these value updates
       animates: [
         () => this._animatedOpacity,
-        () => this._animatedWidth
       ]
     },
     // Window width
@@ -101,8 +104,8 @@ export default class Drawer extends Component {
   // Animates backdrop opacity
   _animatedOpacity = new Animated.Value(this.config.opacity.start)
 
-  // Animates window width
-  _animatedWidth = new Animated.Value(this.config.width.start)
+  // Animates header
+  _animatedHeader = new Animated.Value(0)
 
   // Animates window position
   _animatedPosition = new Animated.Value(this.props.isOpen
@@ -157,25 +160,48 @@ export default class Drawer extends Component {
     this._scrollView.scrollToOffset({y: 0, animated: false, ...params})
   }
 
+  closeHeader({animated=false}, cb) {
+    if (animated) {
+      Animated.timing(this._animatedHeader, {
+        toValue: 0,
+        duration: 75,
+        useNativeDriver: true,
+      }).start(cb)
+    } else {
+      this._animatedHeader.setValue(0)
+    }
+  }
+
+  _onMomentumScrollBegin(e) {
+    const curY = e.nativeEvent.contentOffset.y
+    if (curY <= this.state.scrollY) {
+      // close
+      this.closeHeader({animated: true})
+    } else {
+      // open
+      Animated.timing(this._animatedHeader, {
+        toValue: NAVBAR_HEIGHT,
+        duration: 125,
+        useNativeDriver: true,
+      }).start()
+    }
+  }
+
+  _onScrollBeginDrag(e) {
+    // set
+    this.state.scrollY = e.nativeEvent.contentOffset.y
+  }
+
   render() {
-    const { children, header } = this.props,
+    const { children, header, HeaderComponent } = this.props,
       // Interpolate position value into opacity value
       animatedOpacity = this._animatedOpacity.interpolate({
         inputRange: [this.config.position.end, this.config.position.start],
         outputRange: [this.config.opacity.end, this.config.opacity.start],
       }),
-      // Interpolate position value into width value
-      animatedWidth = this._animatedWidth.interpolate({
-        inputRange: [this.config.position.min,// top of the screen
-          this.config.position.start - 50,    // 50 pixels higher than next point
-          this.config.position.start,         // a bit higher than the bottom of the screen
-          this.config.position.max            // the bottom of the screen
-        ],
-        outputRange: [this.config.width.end,  // keep max width after next point
-          this.config.width.end,              // end: max width at 50 pixel higher
-          this.config.width.start,            // start: min width at the bottom
-          this.config.width.start             // keep min width before previous point
-        ],
+      opacity = this._animatedHeader.interpolate({
+        inputRange: [0, NAVBAR_HEIGHT / 2, NAVBAR_HEIGHT],
+        outputRange: [0, 0.8, 1],
       })
     return (
       <Animated.View style={[styles.container, this.getContainerStyle()]}>
@@ -202,8 +228,6 @@ export default class Drawer extends Component {
           style={[styles.content, {
             // Add padding at the bottom to fit all content on the screen
             paddingBottom: this.props.headerHeight,
-            // Animate width
-            width: animatedWidth,
             // Animate position on the screen
             transform: [{ translateY: this._animatedPosition }, { translateX: 0 }]
           }]}
@@ -211,12 +235,12 @@ export default class Drawer extends Component {
           {...this._panResponder.panHandlers}
         >
           {/* Put all content in a scrollable container */}
-          <FlatList
+          <AnimatedListView
             inverted={this.props.inverted}
             style={{flex: 1}}
             data={this.props.data}
             renderItem={this.props.renderItem}
-            ref={(scrollView) => { this._scrollView = scrollView }}
+            ref={(scrollView) => { if (scrollView) this._scrollView = scrollView._component }}
             // Enable scrolling only when the window is open
             scrollEnabled={this.state.open}
             // Show/hide scrolling indicators
@@ -224,15 +248,19 @@ export default class Drawer extends Component {
             showsVerticalScrollIndicator={true}
             // Trigger onScroll often
             keyExtractor={(item, index) => index.toString()}
-            scrollEventThrottle={16}
-            onResponderRelease={e => {
-              if (e.nativeEvent.locationY <= 5) {
-                this.props.onPress()
-                setTimeout(_ => this.scrollDrawerBottom(), 500)
-              }
-            }}
-            onScroll={this._handleScroll}
+            scrollEventThrottle={1}
+            onMomentumScrollBegin={e => this._onMomentumScrollBegin(e)}
+            onScrollBeginDrag={e => this._onScrollBeginDrag(e)}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: this.state.scrollAnim } } }],
+              { useNativeDriver: true },
+            )}
           />
+  {this.state.open ?
+          <Animated.View style={[styles.navbar, { opacity, transform: [{ translateY: this._animatedHeader }] }]}>
+              <HeaderComponent />
+          </Animated.View>
+          : null }
         </Animated.View>
       </Animated.View>
     )
@@ -335,6 +363,7 @@ export default class Drawer extends Component {
       Animated.timing(this._animatedPosition, {
         toValue: this.config.position.end,
         duration: 225,
+        useNativeDriver: true,
       }).start()
     })
     if (this.props.onOpen) this.props.onOpen()
@@ -342,14 +371,16 @@ export default class Drawer extends Component {
 
   // Minimize window and keep a teaser at the bottom
   close = () => {
-      Animated.timing(this._animatedPosition, {
-        toValue: this.config.position.start,
-        duration: 300,
-      }).start(() => this.setState({
-        open: false,
-      }, this.scrollDrawerTop))
-      if (this.props.onClose) this.props.onClose(this._scrollView)
-    }
+    this.closeHeader({animated: false})
+    Animated.timing(this._animatedPosition, {
+      toValue: this.config.position.start,
+      useNativeDriver: true,
+      duration: 300,
+    }).start(() => this.setState({
+      open: false,
+    }, this.scrollDrawerTop))
+    if (this.props.onClose) this.props.onClose(this._scrollView)
+  }
 
   // Toggle window state between opened and closed
   toggle = () => {
@@ -393,6 +424,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',               // center children
     justifyContent: 'flex-end',         // align popup at the bottom
     backgroundColor: 'transparent',     // transparent background
+  },
+  navbar: {
+    position: 'absolute',
+    top: -NAVBAR_HEIGHT,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,.3)',
+    height: NAVBAR_HEIGHT,
+    justifyContent: 'center',
+    paddingTop: NAVBAR_HEIGHT,
   },
   // Semi-transparent background below popup
   backdrop: {
